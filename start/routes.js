@@ -16,17 +16,23 @@
 /** @type {typeof import('@adonisjs/framework/src/Route/Manager')} */
 const Route = use('Route')
 
-Route.post('users/register', 'UserController.store')
-Route.post('users/login', 'UserController.login')
+Route.group(() => {
+  Route.post('register', 'UserController.store')
+  Route.post('login', 'UserController.login')
+  Route.post('forgotPassword', 'UserController.pw_recovery')
+  Route.put('forgotPassword/:token/:email', 'UserController.update_pw')
+  Route.get('me', 'UserController.me').middleware(['auth'])
+}).prefix('api')
 
 Route.group(() => {
   // updating username and password
   Route.put('users/:id', 'UserController.update')
-}).middleware(['auth'])
+}).middleware(['auth']).prefix("api")
 
-Route.post('users/forgotPassword', 'UserController.pw_recovery')
-Route.put('users/forgotPassword/:token/:email', 'UserController.update_pw')
+
 
 Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }
-})
+}).prefix("api")
+
+Route.any('*', ({view}) => view.render('app'))

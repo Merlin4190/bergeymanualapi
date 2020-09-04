@@ -18,9 +18,13 @@ class UserController {
 
             // if user exists don't save
             if (userExists) {
-                return response
-                .status(400)
-                .send({ message: { error: 'User already registered' } })
+              return response.status(400).json({
+                status: 'error',
+                message: 'User already registered.'
+              })
+                // return response
+                // .status(400)
+                // .send({ message: { error: 'User already registered' } })
             }
 
             // if user doesn't exist, proceeds with saving him in DB
@@ -35,6 +39,45 @@ class UserController {
         }
     }
 
+    async register ({ request, auth, response }) {
+      const userData = request.only(['username', 'email', 'password'])
+  
+      try {
+        const user = await User.create(userData)
+  
+        const token = await auth.generate(user)
+  
+        return response.json({
+          status: 'success',
+          data: token
+        })
+      } catch (error) {
+        return response.status(400).json({
+          status: 'error',
+          message: 'There was a problem creating the user, please try again later.'
+        })
+      }
+    }
+
+    async login ({ request, auth, response }) {
+      const { email, password } = request.only(['email', 'password'])
+  
+      try {
+        const token = await auth.attempt(email, password)
+  
+        return response.json({
+          status: 'success',
+          data: token
+        })
+      } catch (error) {
+        response.status(400).json({
+          status: 'error',
+          message: 'Invalid email/password.'
+        })
+      }
+    }
+
+    /*
     async login({request, auth, response}) {
 
         let {email, password} = request.all();
@@ -51,10 +94,12 @@ class UserController {
 
         }
         catch (e) {
-          console.log(e)
+          // console.log(e)
           return response.json({message: 'You are not registered!'})
         }
     }
+
+    */
 
     async update ({ request, response, params }) {
         const id = params.id
@@ -151,6 +196,13 @@ class UserController {
     
         // persisting data (saving)
         await user.save()
+    }
+
+    async me ({ auth, response }) {
+      return response.json({
+        status: 'success',
+        data: auth.user
+      })
     }
 }
 
