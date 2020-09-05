@@ -35,4 +35,4 @@ Route.get('/', () => {
   return { greeting: 'Hello world in JSON' }
 }).prefix("api")
 
-Route.any('*', ({view}) => view.render('app'))
+// dont use edge to render any route anymore. the frontend will be managed fully by nuxt
